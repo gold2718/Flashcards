@@ -31,9 +31,11 @@ from Flashcard import Flashcard
 
 
 class DatabaseManager:
-    DB_PATH = "Flashcards.db"
 
-    def __init__(self):
+    def __init__(self, db_path):
+
+        # Save the database path
+        self.db_path = db_path
 
         # Initialize a single sqlite3 connection. One and only one initialization.
         self.db_connection: sqlite3.Connection = None
@@ -61,7 +63,7 @@ class DatabaseManager:
         Set connection and cursor attributes for database access.
         """
         try:
-            self.db_connection = sqlite3.connect(DatabaseManager.DB_PATH,
+            self.db_connection = sqlite3.connect(self.db_path,
                                                  detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
             self.cursor = self.db_connection.cursor()
             self.is_database_open = True
@@ -90,7 +92,7 @@ class DatabaseManager:
         Check if database exists. If it does not, create.
         """
         should_create_tables = False
-        if not os.path.exists(DatabaseManager.DB_PATH):
+        if not os.path.exists(self.db_path):
             # TODO: Find a better way to check if this is a valid database.
             should_create_tables = True
         try:
@@ -115,22 +117,22 @@ class DatabaseManager:
 
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS deck (
-            deck_id INTEGER PRIMARY KEY, 
-            title TEXT NOT NULL, 
-            last_study_datetime timestamp ) 
+            deck_id INTEGER PRIMARY KEY,
+            title TEXT NOT NULL,
+            last_study_datetime timestamp )
             """)
 
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS flashcard (
-            flashcard_id INTEGER PRIMARY KEY, 
-            deck_id INTEGER NOT NULL, 
-            question TEXT NOT NULL, 
+            flashcard_id INTEGER PRIMARY KEY,
+            deck_id INTEGER NOT NULL,
+            question TEXT NOT NULL,
             answer TEXT NOT NULL,
-            last_study_date timestamp, 
+            last_study_date timestamp,
             due_date_string TEXT,
             inter_repetition_interval INTEGER,
             easiness_factor REAL,
-            repetition_number INTEGER, 
+            repetition_number INTEGER,
             FOREIGN KEY (deck_id) REFERENCES deck (deck_id) )
             """)
 
@@ -193,7 +195,7 @@ class DatabaseManager:
         repetition_number = 0
         flashcard_row_tuple = (deck_id, question, answer, last_study_date, due_date_string, inter_repetition_interval,
                                easiness_factor, repetition_number)
-        sql = ''' INSERT INTO flashcard(deck_id, question, answer, last_study_date, due_date_string, 
+        sql = ''' INSERT INTO flashcard(deck_id, question, answer, last_study_date, due_date_string,
                                 inter_repetition_interval, easiness_factor, repetition_number)
                       VALUES(?,?,?,?,?,?,?,?) '''
         self.cursor.execute(sql, flashcard_row_tuple)
@@ -300,8 +302,8 @@ class DatabaseManager:
         parameter = (deck.deck_id, today_string)
         # Due date is stored as str in the db. We make a string comparison to find due flashcards.
         results = self.cursor.execute("""
-                                    SELECT * 
-                                    FROM flashcard 
+                                    SELECT *
+                                    FROM flashcard
                                     WHERE deck_id == ? AND
                                     due_date_string <= ?
                                         """, parameter)
@@ -350,7 +352,7 @@ class DatabaseManager:
         # self.db_connection.set_trace_callback(print)
         deck_row_tuple = (title, last_study_datetime, int(deck_id))
         sql = ''' UPDATE deck
-                    SET title = ? , 
+                    SET title = ? ,
                     last_study_datetime = ?
                     WHERE deck_id = ? '''
         self.cursor.execute(sql, deck_row_tuple)
@@ -385,10 +387,10 @@ class DatabaseManager:
         sql = ''' UPDATE flashcard
                             SET question = ? ,
                                 answer = ?,
-                                last_study_date = ?, 
+                                last_study_date = ?,
                                 due_date_string = ?,
-                                inter_repetition_interval = ?, 
-                                easiness_factor = ?, 
+                                inter_repetition_interval = ?,
+                                easiness_factor = ?,
                                 repetition_number = ?
                             WHERE flashcard_id = ? '''
         self.cursor.execute(sql, flashcard_row_tuple)

@@ -21,10 +21,22 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Run the Flashcards application by Ertugrul Harman."""
+
+import argparse
+import sys
 from Program import Program
 
 def main():
-    program = Program()
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    help_str = "Path to a Flashcards database (stored session) file"
+    parser.add_argument("--database", metavar='<Flashcards database file>',
+                        type=str, required=False, default="Flashcards.db",
+                        help=help_str)
+    args = parser.parse_args(sys.argv[1:])
+    db_path = args.database
+    program = Program(db_path)
     program.mainloop()
 
 # Call the main function

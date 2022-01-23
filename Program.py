@@ -47,12 +47,12 @@ class Program(tk.Tk):
     DECKSFRAME = "ManageDecksFrame"
     FLASHCARDSFRAME = "ManageFlashcardsFrame"
 
-    def __init__(self):
+    def __init__(self, db_path):
         # Initialize super class
         tk.Tk.__init__(self)
 
         # It will be used for all database and data operations by this class and by child frames.
-        self.database_manager = DatabaseManager()
+        self.database_manager = DatabaseManager(db_path)
 
         # It will be used for all import and export operations.
         self.import_export_manager = ImportExportManager(self.database_manager)
@@ -61,14 +61,14 @@ class Program(tk.Tk):
         # The r prefix specifies it as a raw string. See: https://stackoverflow.com/q/55890931/3780985
         if platform.system() == 'Darwin':  # macOS
             icon_path = self.resource_path(r"icon/favicon.gif")
-            img = tk.PhotoImage(file=icon_path)                      
+            img = tk.PhotoImage(file=icon_path)
             self.tk.call('wm', 'iconphoto', self._w, img)
         elif platform.system() == 'Windows':  # Windows
             icon_path = self.resource_path(r"icon\favicon.ico")
             self.iconbitmap(self, icon_path)
         else:  # linux variants
             icon_path = self.resource_path(r"icon/favicon.gif")
-            img = tk.PhotoImage(file=icon_path)                      
+            img = tk.PhotoImage(file=icon_path)
             self.tk.call('wm', 'iconphoto', self._w, img)
         # end set the app favicon
 
@@ -277,7 +277,7 @@ class Program(tk.Tk):
             window_width = Program.WINDOW_WIDTH + 130
             window_height = Program.WINDOW_HEIGHT
         # end if
-        
+
         # print(self.winfo_width())
         # print(self.winfo_height())
 
@@ -298,14 +298,14 @@ class Program(tk.Tk):
         """
         message_text = """
         Flashcards {}
-        
+
         Copyright 2020 Ertugrul Harman
-        
+
         GitHub: https://github.com/harmancode/Flashcards
         E-mail: harmancode@gmail.com
         Twitter: https://twitter.com/harmancode
         Web: https://harman.page
-        
+
         Flashcards is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See the GNU General Public License for more details. https://www.gnu.org/licenses/
         """.format(Program.VERSION_NUMBER)
         tk.messagebox.showinfo(title="About Flashcards", message=message_text)
@@ -366,9 +366,9 @@ class Program(tk.Tk):
 
                     export_message = """
                     Export is successful.
-                    
+
                     Please note that export functionality is for using this data in other applications. Therefore only deck's title, and all flashcards in the deck have been exported. Other data about the deck, such as last study date, due date, your previous responses to the flashcards, etc., have not been exported.
-                    
+
                     If you intend to back up your data to use it later with this program you should not use export functionality for this purpose. You can back up \"Flashcards.db\" file that is located in the program directory (by copying it to another location, for example), and restore it later.
                     """
 
